@@ -1,0 +1,8 @@
+.RData
+.Rhistory
+.DS_Store
+.Rproj.user/
+zArchive/
+*.Rproj
+*.pdf
+*.docx
