@@ -25,23 +25,23 @@ library(jsonlite)
 # *****************************************************************************
 
 PROPERTY_ID   <- 486592111
-wp_hosts      <- c("sipexchangebc.com")
-ckan_hosts    <- c("resources.sipexchangebc.com", "www.resources.sipexchangebc.com")
-bot_hosts     <- c("staging-resources.sipexchangebc.com", "104.36.148.162", "104.36.148.138")
+wp_hosts <- c("sipexchangebc.com")
+ckan_hosts <- c("resources.sipexchangebc.com", "www.resources.sipexchangebc.com")
+bot_hosts <- c("staging-resources.sipexchangebc.com", "104.36.148.162", "104.36.148.138")
 bot_countries <- c("Singapore", "China")
-bot_patterns  <- c("bot", "spider", "crawler", "googlebot", "bingbot",
+bot_patterns <- c("bot", "spider", "crawler", "googlebot", "bingbot",
                    "semrush", "ahrefsbot", "mj12bot", "yandex", "baidu")
 
 # *****************************************************************************
 # sip colours for pdf
 # *****************************************************************************
 
-col_dark    <- "#002a26"  
-col_gold    <- "#e8aa00"  
-col_lime    <- "#a7ce09"  
+col_dark <- "#002a26"  
+col_gold <- "#e8aa00"  
+col_lime <- "#a7ce09"  
 col_card_bg <- "#e8f5e0"  
-col_white   <- "#ffffff"
-col_black   <- "#000000"
+col_white <- "#ffffff"
+col_black <- "#000000"
 
 # *****************************************************************************
 #' pdf helper

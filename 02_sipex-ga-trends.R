@@ -29,9 +29,9 @@ TOP_N <- 20
 
 geo_label <- if (usca_only) "US & Canada" else "All Regions"
 
-# =============================================================================
+# *****************************************************************************
 # pull data
-# =============================================================================
+# *****************************************************************************
 
 df_search_monthly <- ga_data(PROPERTY_ID,
                              metrics    = c("eventCount", "activeUsers"),
@@ -58,18 +58,18 @@ df_trend_downloads <- ga_data(PROPERTY_ID,
                               dimensions = c("year", "month", "eventName", "linkText", "linkUrl", "country"),
                               date_range = c(trend_start, trend_end), limit = 1000)
 
-# =============================================================================
+# *****************************************************************************
 # clean unicode minus
-# =============================================================================
+# *****************************************************************************
 
 clean_unicode <- function(x) gsub("−", "-", x, fixed = TRUE)
 
 df_trend_downloads <- df_trend_downloads %>%
   mutate(linkUrl = clean_unicode(linkUrl), linkText = clean_unicode(linkText))
 
-# =============================================================================
+# *****************************************************************************
 # filter & transform
-# =============================================================================
+# *****************************************************************************
 
 clean_search <- df_search_monthly %>%
   filter(!country %in% bot_countries, !is.na(searchTerm),
@@ -143,6 +143,7 @@ fetch_ckan_tags <- function() {
   }, error = function(e) NULL)
 }
 
+# fetch all ckan tags
 fetch_tag_count <- function(tag_name) {
   tryCatch({
     resp <- jsonlite::fromJSON(paste0(
@@ -165,9 +166,9 @@ if (!is.null(all_tags) && nrow(all_tags) > 0) {
   search_tag_gap <- data.frame()
 }
 
-# =============================================================================
+# *****************************************************************************
 # plots
-# =============================================================================
+# *****************************************************************************
 
 dark_theme <- theme_minimal() +
   theme(
@@ -175,10 +176,10 @@ dark_theme <- theme_minimal() +
     panel.background = element_rect(fill = "white", color = NA),
     panel.grid.major = element_line(color = "grey90"),
     panel.grid.minor = element_blank(),
-    text             = element_text(color = "grey20"),
-    axis.text        = element_text(color = "grey20"),
-    plot.title       = element_text(color = col_dark, fontface = "bold"),
-    plot.subtitle    = element_text(color = col_dark)
+    text = element_text(color = "grey20"),
+    axis.text = element_text(color = "grey20"),
+    plot.title = element_text(color = col_dark, fontface = "bold"),
+    plot.subtitle = element_text(color = col_dark)
   )
 
 p_engagement_time <- ggplot(clean_trend_engagement,
@@ -222,9 +223,9 @@ p_search_trend <- clean_search %>% arrange(desc(eventCount)) %>% head(TOP_N) %>%
   theme(axis.text.y = element_text(size = 7, color = "grey20"),
         plot.margin = margin(10, 10, 10, 120))
 
-# =============================================================================
+# *****************************************************************************
 # export pdf
-# =============================================================================
+# *****************************************************************************
 
 pdf_file <- paste0("SIPex_Trends_", gsub("-", "", trend_start), "_",
                    gsub("-", "", trend_end), ".pdf")

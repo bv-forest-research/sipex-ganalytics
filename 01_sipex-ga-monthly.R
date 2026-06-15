@@ -11,8 +11,8 @@ source("00_init.R")
 # set params
 # *****************************************************************************
 
-date_start <- "2026-04-01"
-date_end   <- "2026-04-30"
+date_start <- "2026-05-01"
+date_end   <- "2026-05-31"
 
 # set to TRUE to report US & Canada only, FALSE for all users
 usca_only <- FALSE
@@ -27,42 +27,42 @@ geo_label <- if (usca_only) "US & Canada" else "All Regions"
 # *****************************************************************************
 
 df_traffic <- ga_data(PROPERTY_ID,
-                      metrics    = c("sessions", "activeUsers", "newUsers", "screenPageViews",
-                                     "averageSessionDuration", "engagementRate"),
+                      metrics = c("sessions", "activeUsers", "newUsers", "screenPageViews",
+                                  "averageSessionDuration", "engagementRate"),
                       dimensions = c("date", "country"), date_range = c(date_start, date_end))
 
 df_channels <- ga_data(PROPERTY_ID,
-                       metrics    = c("sessions", "activeUsers"),
+                       metrics = c("sessions", "activeUsers"),
                        dimensions = c("sessionDefaultChannelGroup", "country"),
                        date_range = c(date_start, date_end))
 
 df_sources <- ga_data(PROPERTY_ID,
-                      metrics    = c("sessions", "activeUsers"),
+                      metrics = c("sessions", "activeUsers"),
                       dimensions = c("sessionSourceMedium", "country"),
                       date_range = c(date_start, date_end), limit = 200)
 
 df_pages <- ga_data(PROPERTY_ID,
-                    metrics    = c("screenPageViews", "activeUsers", "averageSessionDuration"),
+                    metrics = c("screenPageViews", "activeUsers", "averageSessionDuration"),
                     dimensions = c("pageTitle", "pagePath", "hostName", "country"),
                     date_range = c(date_start, date_end), limit = 500)
 
 df_geo <- ga_data(PROPERTY_ID,
-                  metrics    = c("activeUsers", "sessions"),
+                  metrics = c("activeUsers", "sessions"),
                   dimensions = c("country", "region", "city"),
                   date_range = c(date_start, date_end), limit = 100)
 
 df_devices <- ga_data(PROPERTY_ID,
-                      metrics    = c("activeUsers", "sessions"),
+                      metrics = c("activeUsers", "sessions"),
                       dimensions = c("deviceCategory", "country"),
                       date_range = c(date_start, date_end))
 
 df_search <- ga_data(PROPERTY_ID,
-                     metrics    = c("eventCount", "activeUsers"),
+                     metrics = c("eventCount", "activeUsers"),
                      dimensions = c("searchTerm", "country"),
                      date_range = c(date_start, date_end), limit = 200)
 
 df_downloads <- ga_data(PROPERTY_ID,
-                        metrics    = c("eventCount"),
+                        metrics = c("eventCount"),
                         dimensions = c("eventName", "linkText", "linkUrl", "country"),
                         date_range = c(date_start, date_end), limit = 500)
 
@@ -79,11 +79,14 @@ df_outbound <- ga_data(PROPERTY_ID,
 clean_unicode <- function(x) gsub("−", "-", x, fixed = TRUE)
 
 if (exists("df_downloads"))
-  df_downloads <- df_downloads %>% mutate(linkUrl = clean_unicode(linkUrl), linkText = clean_unicode(linkText))
+  df_downloads <- df_downloads %>% 
+  mutate(linkUrl = clean_unicode(linkUrl), linkText = clean_unicode(linkText))
 if (exists("df_outbound"))
-  df_outbound  <- df_outbound  %>% mutate(linkUrl = clean_unicode(linkUrl), linkText = clean_unicode(linkText))
+  df_outbound <- df_outbound %>% 
+  mutate(linkUrl = clean_unicode(linkUrl), linkText = clean_unicode(linkText))
 if (exists("df_pages"))
-  df_pages     <- df_pages     %>% mutate(pagePath = clean_unicode(pagePath), pageTitle = clean_unicode(pageTitle))
+  df_pages <- df_pages %>% 
+  mutate(pagePath = clean_unicode(pagePath), pageTitle = clean_unicode(pageTitle))
 
 # *****************************************************************************
 # filter & transform
@@ -120,7 +123,8 @@ clean_pages <- df_pages %>%
   filter(!grepl(paste(bot_patterns, collapse = "|"), pageTitle, ignore.case = TRUE),
          !hostName %in% bot_hosts, !country %in% bot_countries)
 
-df_geo <- df_geo %>% filter(!country %in% bot_countries)
+df_geo <- df_geo %>% 
+  filter(!country %in% bot_countries)
 
 clean_devices <- df_devices %>%
   filter(!country %in% bot_countries) %>%
@@ -169,12 +173,23 @@ clean_outbound <- df_outbound %>%
   summarise(eventCount = sum(eventCount), .groups = "drop")
 
 if (usca_only) {
-  clean_pages     <- clean_pages     %>% filter(country %in% c("United States", "Canada"))
-  clean_channels  <- clean_channels  %>% filter(country %in% c("United States", "Canada"))
-  df_geo          <- df_geo          %>% filter(country %in% c("United States", "Canada"))
-  clean_search    <- clean_search    %>% filter(country %in% c("United States", "Canada"))
-  clean_downloads <- clean_downloads %>% filter(country %in% c("United States", "Canada"))
-  clean_outbound  <- clean_outbound  %>% filter(country %in% c("United States", "Canada"))
+  clean_pages <- clean_pages %>% 
+    filter(country %in% c("United States", "Canada"))
+  
+  clean_channels  <- clean_channels %>% 
+    filter(country %in% c("United States", "Canada"))
+  
+  df_geo <- df_geo %>% 
+    filter(country %in% c("United States", "Canada"))
+  
+  clean_search <- clean_search %>% 
+    filter(country %in% c("United States", "Canada"))
+  
+  clean_downloads <- clean_downloads %>% 
+    filter(country %in% c("United States", "Canada"))
+  
+  clean_outbound  <- clean_outbound %>% 
+    filter(country %in% c("United States", "Canada"))
 }
 
 clean_pages <- clean_pages %>%
@@ -182,8 +197,11 @@ clean_pages <- clean_pages %>%
   summarise(screenPageViews = sum(screenPageViews), activeUsers = sum(activeUsers),
             averageSessionDuration = mean(averageSessionDuration), .groups = "drop")
 
-wp_pages   <- clean_pages %>% filter(hostName %in% wp_hosts)
-ckan_pages <- clean_pages %>% filter(hostName %in% ckan_hosts)
+wp_pages   <- clean_pages %>% 
+  filter(hostName %in% wp_hosts)
+
+ckan_pages <- clean_pages %>% 
+  filter(hostName %in% ckan_hosts)
 
 clean_cities <- df_geo %>%
   filter(city != "(not set)") %>%
@@ -210,10 +228,10 @@ dark_theme <- theme_minimal() +
     panel.background = element_rect(fill = "white", color = NA),
     panel.grid.major = element_line(color = "grey90"),
     panel.grid.minor = element_blank(),
-    text             = element_text(color = "grey20"),
-    axis.text        = element_text(color = "grey20"),
-    plot.title       = element_text(color = col_dark, fontface = "bold"),
-    plot.subtitle    = element_text(color = col_dark)
+    text = element_text(color = "grey20"),
+    axis.text = element_text(color = "grey20"),
+    plot.title = element_text(color = col_dark, fontface = "bold"),
+    plot.subtitle = element_text(color = col_dark)
   )
 
 p_trend <- ggplot(clean_traffic, aes(x = as.Date(date), y = sessions)) +
@@ -284,9 +302,9 @@ section_title("1. Traffic Snapshot", date_start, "Key activity metrics for the r
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(3, 2, widths = unit(c(1,1), "null"))))
 metrics_list <- list(
-  list("Total Sessions",  sum(clean_traffic$sessions)),
-  list("Active Users",    sum(clean_traffic$activeUsers)),
-  list("New Users",       sum(clean_traffic$newUsers)),
+  list("Total Sessions", sum(clean_traffic$sessions)),
+  list("Active Users", sum(clean_traffic$activeUsers)),
+  list("New Users", sum(clean_traffic$newUsers)),
   list("Returning Users", sum(clean_traffic$returningUsers)),
   list("Total Pageviews", sum(clean_traffic$screenPageViews)),
   list("Avg Engagement",  paste0(round(mean(clean_traffic$engagementRate) * 100, 1), "%"))
@@ -346,52 +364,56 @@ make_table(ckan_table, "5b. Most Visited Pages - CKAN", "Current month",
            footnote = "Views = total page loads. Users = distinct people who visited.")
 
 # 6. downloads
-dl_table <- clean_downloads %>%
-  mutate(
-    dataset_slug = ifelse(
-      grepl("resources.sipexchangebc.com/dataset/", linkUrl),
-      gsub(".*/dataset/([^/]+)/resource.*", "\\1", linkUrl),
-      NA_character_
-    )
-  ) %>%
-  filter(!is.na(dataset_slug)) %>%
-  group_by(dataset_slug) %>%
-  summarise(eventCount = sum(eventCount), .groups = "drop") %>%
-  arrange(desc(eventCount)) %>%
-  head(TOP_N)
-
-dl_table <- dl_table %>%
-  mutate(
-    datasetTitle = sapply(dataset_slug, resolve_slug_to_title),
-    datasetTitle = ifelse(is.na(datasetTitle), dataset_slug, datasetTitle),
-    datasetTitle = sapply(datasetTitle, function(x) {
-      if (nchar(x) > 80) paste(strwrap(x, width = 80), collapse = "\n") else x })
-  ) %>%
-  select(datasetTitle, eventCount) %>%
-  rename("Dataset" = datasetTitle, "Downloads" = eventCount)
-
-make_table(dl_table, "6. Most Downloaded Resources", "Current month",
-           "Total downloads per dataset.",
-           footnote = "Downloads aggregated across all resources within each dataset.")
+if (nrow(clean_downloads) > 0) {
+  dl_table <- clean_downloads %>%
+    mutate(
+      dataset_slug = ifelse(
+        grepl("resources.sipexchangebc.com/dataset/", linkUrl),
+        gsub(".*/dataset/([^/]+)/resource.*", "\\1", linkUrl),
+        NA_character_
+      )
+    ) %>%
+    filter(!is.na(dataset_slug)) %>%
+    group_by(dataset_slug) %>%
+    summarise(eventCount = sum(eventCount), .groups = "drop") %>%
+    arrange(desc(eventCount)) %>%
+    head(TOP_N)
+  
+  dl_table <- dl_table %>%
+    mutate(
+      datasetTitle = sapply(dataset_slug, resolve_slug_to_title),
+      datasetTitle = ifelse(is.na(datasetTitle), dataset_slug, datasetTitle),
+      datasetTitle = sapply(datasetTitle, function(x) {
+        if (nchar(x) > 80) paste(strwrap(x, width = 80), collapse = "\n") else x })
+    ) %>%
+    select(datasetTitle, eventCount) %>%
+    rename("Dataset" = datasetTitle, "Downloads" = eventCount)
+  
+  make_table(dl_table, "6. Most Downloaded Resources", "Current month",
+             "Total downloads per dataset.",
+             footnote = "Downloads aggregated across all resources within each dataset.")
+}
 
 # 7. outbound
-ob_raw <- clean_outbound %>% arrange(desc(eventCount)) %>% head(TOP_N) %>%
-  mutate(dataset_slug = gsub("^/dataset/([^/]+).*", "\\1", pagePath))
-
-ob_raw <- ob_raw %>%
-  mutate(datasetTitle = sapply(dataset_slug, resolve_slug_to_title),
-         datasetTitle = ifelse(is.na(datasetTitle), dataset_slug, datasetTitle),
-         datasetTitle = sapply(datasetTitle, function(x) {
-           if (nchar(x) > 40) paste(strwrap(x, width = 40), collapse = "\n") else x }),
-         linkUrl = sapply(linkUrl, function(x) {
-           if (nchar(x) > 50) paste(strwrap(x, width = 50), collapse = "\n") else x }))
-
-ob_table <- ob_raw %>%
-  select(datasetTitle, linkUrl, eventCount) %>%
-  rename("Dataset" = datasetTitle, "Outbound URL" = linkUrl, "Clicks" = eventCount)
-
-make_table(ob_table, "7. Outbound Links", "Current month",
-           "External links clicked from CKAN dataset pages.")
+if (nrow(clean_outbound) > 0) {
+  ob_raw <- clean_outbound %>% arrange(desc(eventCount)) %>% head(TOP_N) %>%
+    mutate(dataset_slug = gsub("^/dataset/([^/]+).*", "\\1", pagePath))
+  
+  ob_raw <- ob_raw %>%
+    mutate(datasetTitle = sapply(dataset_slug, resolve_slug_to_title),
+           datasetTitle = ifelse(is.na(datasetTitle), dataset_slug, datasetTitle),
+           datasetTitle = sapply(datasetTitle, function(x) {
+             if (nchar(x) > 40) paste(strwrap(x, width = 40), collapse = "\n") else x }),
+           linkUrl = sapply(linkUrl, function(x) {
+             if (nchar(x) > 50) paste(strwrap(x, width = 50), collapse = "\n") else x }))
+  
+  ob_table <- ob_raw %>%
+    select(datasetTitle, linkUrl, eventCount) %>%
+    rename("Dataset" = datasetTitle, "Outbound URL" = linkUrl, "Clicks" = eventCount)
+  
+  make_table(ob_table, "7. Outbound Links", "Current month",
+             "External links clicked from CKAN dataset pages.")
+}
 
 # devices
 section_title("Device Breakdown", geo_label, "Breakdown of visits by device type.")
