@@ -19,6 +19,12 @@ library(jsonlite)
 
 # auth
 # ga_auth()
+# auth
+googleAuthR::gar_set_client(
+  "client.json",
+  scopes = "https://www.googleapis.com/auth/analytics.readonly"
+)
+ga_auth(email = "nucifraga@bvcentre.ca")
 
 # *****************************************************************************
 # constants
